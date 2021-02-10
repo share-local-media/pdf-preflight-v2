@@ -21,7 +21,7 @@ module Preflight
         array = []
         info = ohash.object(ohash.trailer[:Info])
         if info.nil?
-          array << Issue.new("Info dict definition is missing", self, :key => key)
+          array << Issue.new("Info dict definition is missing", self)
         else
           if !info.has_key?(:Trapped)
             array << Issue.new("Info dict does not specify Trapped", self)

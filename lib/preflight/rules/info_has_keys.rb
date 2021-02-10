@@ -26,7 +26,7 @@ module Preflight
         array = []
         info = ohash.object(ohash.trailer[:Info])
         if info.nil?
-          array << Issue.new("Info dict definition is missing", self, :key => key)
+          array << Issue.new("Info dict definition is missing", self)
         else
           missing = @keys - info.keys
           missing.map { |key|
