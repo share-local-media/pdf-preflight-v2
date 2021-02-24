@@ -19,7 +19,7 @@ module Preflight
 
       # Default tolerance is that each page box MUST be within .03 PDF points
       # of the same box on all other pages
-      DEFAULT_TOLERANCE = (BigDecimal.new("-0.03")..BigDecimal.new("0.03"))
+      DEFAULT_TOLERANCE = (BigDecimal('-0.03')..BigDecimal('0.03'))
 
       attr_reader :issues
 

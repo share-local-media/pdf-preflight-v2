@@ -11,13 +11,13 @@ module Preflight
     # convert inches to standard PDF points
     #
     def in2pt(inch)
-      return inch * BigDecimal.new("72")
+      return inch * BigDecimal('72')
     end
 
     # convert mm to standard PDF points
     #
     def mm2pt(mm)
-      return mm * (BigDecimal.new("72") / BigDecimal.new("25.4"))
+      return mm * (BigDecimal('72') / BigDecimal('25.4'))
     end
 
     # convert mm to standard PDF points
