@@ -23,11 +23,17 @@ module Preflight
       end
 
       def check_hash(ohash)
+        array = []
         info = ohash.object(ohash.trailer[:Info])
-        missing = @keys - info.keys
-        missing.map { |key|
-          Issue.new("Info dict missing required key", self, :key => key)
-        }
+        if info.nil?
+          array << Issue.new("Info dict definition is missing", self)
+        else
+          missing = @keys - info.keys
+          missing.map { |key|
+            array << Issue.new("Info dict missing required key", self, :key => key)
+          }
+        end
+        array
       end
     end
   end
