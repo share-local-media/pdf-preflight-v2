@@ -18,8 +18,8 @@ module Preflight
     #
     class MatchInfoPdfxVersions
 
-      def initialize(matches = {})
-        @matches = matches
+      def initialize(checks)
+        @checks = checks
       end
 
       def check_hash(ohash)
@@ -29,24 +29,24 @@ module Preflight
 
         if info.nil?
           return [Issue.new("Info dict definition is missing", self)]
-        elsif !@matches.is_a?(Hash)
-          raise ArgumentError, "matches have to be a hash of hashes"
+        elsif !@checks.is_a?(Hash)
+          raise ArgumentError, "checks have to be a hash of hashes"
         else
-          @matches.each do |pdfx_version, version_required_attrs|
-            Preflight::Rules::MatchInfoEntries.new(version_required_attrs).
-              then { |checker|
-                versions     << pdfx_version
-                check_result = checker.check_hash(ohash)
+          @checks.each do |pdfx_version, list_of_checks|
+            versions << pdfx_version
 
-                if check_result.any?
-                  unsatisfied_attributes = check_result.map(&:attributes).map {|error_set| error_set }.map(&:to_s)
-                  errors[pdfx_version] = Issue.new(
-                    "Invalid file for #{pdfx_version}. Next attributes are missing or are invalid: #{unsatisfied_attributes}",
-                    self,
-                    unsatisfied_attributes
-                  )
-                end
-              }
+            list_of_checks.each do |checker|
+              check_result           = checker.check_hash(ohash)
+              unsatisfied_attributes = check_result.map(&:attributes).map {|error_set| error_set }.map(&:to_s)
+
+              next unless unsatisfied_attributes.any?
+
+              errors[pdfx_version] = Issue.new(
+                "Invalid file for #{pdfx_version}. Next attributes are missing or are invalid: #{unsatisfied_attributes}",
+                self,
+                unsatisfied_attributes
+              )
+            end
           end
         end
 

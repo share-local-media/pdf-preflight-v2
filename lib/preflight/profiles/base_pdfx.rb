@@ -2,13 +2,21 @@
 
 module Preflight
   module Profiles
-    class PDFX1A
+    class BasePDFX
       include Preflight::Profile
 
-      profile_name "pdfx-1a"
+      profile_name "pdfx"
 
-      rule Preflight::Rules::MatchInfoEntries, {:GTS_PDFXVersion => /\APDF\/X/,
-                                                :GTS_PDFXConformance => /\APDF\/X-1a/}
+      rule Preflight::Rules::MatchInfoPdfxVersions, {
+        PDFX_1a: [
+          Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/),
+          Preflight::Rules::MaxVersion.new(1.3)
+        ],
+        PDFX_4: [
+          Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X-4/),
+          Preflight::Rules::MaxVersion.new(1.6)
+        ]
+      }
       rule Preflight::Rules::RootHasKeys, :OutputIntents
       rule Preflight::Rules::InfoHasKeys, :Title, :CreationDate, :ModDate
       rule Preflight::Rules::InfoSpecifiesTrapping
@@ -18,12 +26,10 @@ module Preflight
       rule Preflight::Rules::NoTransparency
       rule Preflight::Rules::OnlyEmbeddedFonts
       rule Preflight::Rules::BoxNesting
-      rule Preflight::Rules::MaxVersion, 1.3
       rule Preflight::Rules::PrintBoxes
       rule Preflight::Rules::OutputIntentForPdfx
       rule Preflight::Rules::PdfxOutputIntentHasKeys, :OutputConditionIdentifier, :Info
       rule Preflight::Rules::NoRgb
-
     end
   end
 end
