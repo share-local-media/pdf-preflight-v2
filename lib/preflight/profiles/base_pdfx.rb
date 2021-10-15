@@ -10,11 +10,11 @@ module Preflight
       rule Preflight::Rules::MatchInfoPdfxVersions, {
         PDFX_1a: [
           Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/),
-          Preflight::Rules::MaxVersion.new(1.3)
+          Preflight::Rules::MaxVersion.new(1.4)
         ],
         PDFX_4: [
           Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X-4/),
-          Preflight::Rules::MaxVersion.new(1.6)
+          Preflight::Rules::ExactVersion.new(1.6)
         ]
       }
       rule Preflight::Rules::RootHasKeys, :OutputIntents

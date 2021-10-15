@@ -15,7 +15,7 @@ describe Preflight::Rules::MatchInfoPdfxVersions do
     {
       PDFX_1a: [
         Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/),
-        Preflight::Rules::MaxVersion.new(1.3)
+        Preflight::Rules::MaxVersion.new(1.4)
       ],
       PDFX_4: [
         Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X-4/),
@@ -39,7 +39,20 @@ describe Preflight::Rules::MatchInfoPdfxVersions do
   end
 
   context "when providing a file that is not compliant with on of the PDFX attributes on a version" do
-    let(:filename) { pdf_spec_file("version_1_4") } # Max allowed version for pdfx_1a is 1.3
+    let(:checks) do
+      {
+        PDFX_1a: [
+          Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/),
+          Preflight::Rules::MaxVersion.new(1.3) # Set 1.3 as max allowed version for pdfx_1a
+        ],
+        PDFX_4: [
+          Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X-4/),
+          Preflight::Rules::MaxVersion.new(1.6)
+        ]
+      }
+    end
+
+    let(:filename) { pdf_spec_file("version_1_4") }
 
     it "returns an list of errors" do
       errors = chk.check_hash(ohash)
