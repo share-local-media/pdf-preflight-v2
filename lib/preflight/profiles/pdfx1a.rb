@@ -7,8 +7,10 @@ module Preflight
 
       profile_name "pdfx-1a"
 
-      rule Preflight::Rules::MatchInfoPdfxVersions,
-        [{:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/}, :GTS_PDFXVersion => /\APDF\/X-4/]
+      rule Preflight::Rules::MatchInfoPdfxVersions, {
+        PDFX_1a: {:GTS_PDFXVersion => /\APDF\/X/, :GTS_PDFXConformance => /\APDF\/X-1a/},
+        PDFX_4:  {:GTS_PDFXVersion => /\APDF\/X-4/}
+      }
       rule Preflight::Rules::RootHasKeys, :OutputIntents
       rule Preflight::Rules::InfoHasKeys, :Title, :CreationDate, :ModDate
       rule Preflight::Rules::InfoSpecifiesTrapping
