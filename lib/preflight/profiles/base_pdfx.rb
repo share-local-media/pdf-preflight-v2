@@ -5,7 +5,7 @@ module Preflight
     class BasePDFX
       include Preflight::Profile
 
-      profile_name "pdfx"
+      profile_name "base-pdfx"
 
       rule Preflight::Rules::MatchInfoPdfxVersions, {
         PDFX_1a: [
