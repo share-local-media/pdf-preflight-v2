@@ -14,7 +14,7 @@ module Preflight
         ],
         PDFX_4: [
           Preflight::Rules::MatchInfoEntries.new(:GTS_PDFXVersion => /\APDF\/X-4/),
-          Preflight::Rules::ExactVersion.new(1.6)
+          Preflight::Rules::MaxVersion.new(1.6)
         ]
       }
       rule Preflight::Rules::RootHasKeys, :OutputIntents
