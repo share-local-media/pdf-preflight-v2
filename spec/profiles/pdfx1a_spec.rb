@@ -7,7 +7,7 @@ describe Preflight::Profiles::PDFX1A do
     preflight = Preflight::Profiles::PDFX1A.new
     messages  = preflight.check(filename)
 
-    messages.empty?.should be_true
+    messages.should be_empty
   end
 
   it "correctly pass a valid PDF/X-1a file that doesn't use font subsetting" do
@@ -15,7 +15,7 @@ describe Preflight::Profiles::PDFX1A do
     preflight = Preflight::Profiles::PDFX1A.new
     messages  = preflight.check(filename)
 
-    messages.empty?.should be_true
+    messages.should be_empty
   end
 
   it "correctly detect files with an incompatible version" do
@@ -23,7 +23,7 @@ describe Preflight::Profiles::PDFX1A do
     preflight = Preflight::Profiles::PDFX1A.new
     messages  = preflight.check(filename)
 
-    messages.empty?.should_not be_true
+    messages.should_not be_empty
   end
 
   it "correctly detect encrypted files with a blank user password" do

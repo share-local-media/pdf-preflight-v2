@@ -27,7 +27,7 @@ describe Preflight::Issue do
     end
 
     it "should return true to a respond_to? call" do
-      issue.respond_to?(:page).should be_true
+      issue.respond_to?(:page).should be true
     end
 
   end

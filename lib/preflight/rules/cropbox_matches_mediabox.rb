@@ -1,9 +1,12 @@
 # coding: utf-8
 
+require 'bigdecimal'
+
 module Preflight
   module Rules
 
-    # Every page should have a CropBox that matches the MediaBox
+    # Checks the CropBox for every page matches the MediaBox. This is required by
+    # some PDF standards.
     #
     # Arguments: none
     #
@@ -23,7 +26,7 @@ module Preflight
         @issues = []
         dict = page.attributes
 
-        if dict[:CropBox] && round_off(dict[:CropBox]) != round_off(dict[:MediaBox])
+        if dict[:CropBox] && dict[:MediaBox] && round_off(dict[:CropBox]) != round_off(dict[:MediaBox])
           @issues << Issue.new("CropBox must match MediaBox", self, :page => page.number)
         end
       end
@@ -31,7 +34,7 @@ module Preflight
       private
 
       def round_off(*arr)
-        arr.flatten.compact.map { |n| BigDecimal.new(n.to_s).round(2) }
+        arr.flatten.compact.map { |n| BigDecimal(n.to_s).round(2) }  # Changed from BigDecimal.new to BigDecimal
       end
     end
   end

@@ -12,7 +12,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(1).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -26,7 +26,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(2).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -40,7 +40,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(3).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -54,7 +54,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(4).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -68,7 +68,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(5).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -82,7 +82,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(6).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -96,7 +96,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(7).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -110,7 +110,7 @@ describe Preflight::Rules::NoCmyk do
         reader.page(8).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 

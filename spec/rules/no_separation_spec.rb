@@ -6,13 +6,13 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("spot") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -20,17 +20,17 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("spot") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
 
     it "should return the separation name in the issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
@@ -45,21 +45,13 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("spot") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the separation name in the issue" do
-      rule     = Preflight::Rules::NoSeparation.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(3).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.name.should == :Orange
@@ -70,21 +62,13 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("spot") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the separation name in the issue" do
-      rule     = Preflight::Rules::NoSeparation.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(4).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.name.should == :Orange
@@ -95,21 +79,13 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("spot") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoSeparation.new
+      rule = Preflight::Rules::NoSeparation.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(5).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the separation name in the issue" do
-      rule     = Preflight::Rules::NoSeparation.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(5).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.name.should == :Yellow
@@ -120,7 +96,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
@@ -134,7 +110,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
@@ -148,7 +124,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
@@ -162,7 +138,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
@@ -176,7 +152,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(5).walk(rule)
@@ -190,7 +166,7 @@ describe Preflight::Rules::NoSeparation do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoCmyk.new
+      rule = Preflight::Rules::NoCmyk.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(6).walk(rule)

@@ -1,9 +1,12 @@
 # coding: utf-8
 
+require 'bigdecimal'
+
 module Preflight
   module Rules
 
-    # Every page should have identical page boxes
+    # Checks all page boxes (MediaBox, CropBox, etc) are consistent across every
+    # page in the PDF. Useful to ensure a PDF will print consistently.
     #
     # Arguments: none
     #
@@ -12,53 +15,60 @@ module Preflight
     #   class MyPreflight
     #     include Preflight::Profile
     #
-    #     rule Preflight::Rules::BoxNesting
+    #     rule Preflight::Rules::ConsistentBoxes
     #   end
     #
     class ConsistentBoxes
-
-      # Default tolerance is that each page box MUST be within .03 PDF points
-      # of the same box on all other pages
-      DEFAULT_TOLERANCE = (BigDecimal.new("-0.03")..BigDecimal.new("0.03"))
+      # tolerance of 0.03 pts when comparing numbers
+      DEFAULT_TOLERANCE = (BigDecimal("-0.03")..BigDecimal("0.03"))
 
       attr_reader :issues
 
       def initialize(tolerance = DEFAULT_TOLERANCE)
-        @boxes = {}
         @tolerance = tolerance
+        @boxes = {}
+        @issues = []
       end
 
       def page=(page)
-        @issues = []
         dict = page.attributes
 
-        @boxes[:MediaBox] ||= dict[:MediaBox]
-        @boxes[:CropBox]  ||= dict[:CropBox]
-        @boxes[:BleedBox] ||= dict[:BleedBox]
-        @boxes[:TrimBox]  ||= dict[:TrimBox]
-        @boxes[:ArtBox]   ||= dict[:ArtBox]
-
-        %w(MediaBox CropBox BleedBox TrimBox ArtBox).map(&:to_sym).each do |box_type|
-          unless subtract_all(@boxes[box_type], dict[box_type]).all? { |diff| @tolerance.include?(diff) }
-            @issues << Issue.new("#{box_type} must be consistent across every page", self, :page             => page.number,
-                                                                                           :inconsistent_box => box_type)
+        %i(MediaBox CropBox TrimBox ArtBox BleedBox).each do |box|
+          if dict[box]
+            @boxes[box] ||= {}
+            @boxes[box][page.number] = dict[box]
           end
         end
+
+        check_consistency if page.number > 1
       end
 
       private
 
-      def subtract_all(one, two)
-        one ||= [0, 0, 0, 0]
-        two ||= [0, 0, 0, 0]
+      def check_consistency
+        @boxes.each do |name, sizes|
+          if sizes.size > 1
+            points = sizes.values
+            first_box  = points.first
 
-        [
-          one[0] - two[0],
-          one[1] - two[1],
-          one[2] - two[2],
-          one[3] - two[3]
-        ]
+            points[1,points.size].each_with_index do |this_box, idx|
+              page_num = idx + 2
+              if !boxes_match?(first_box, this_box)
+                @issues << Issue.new("#{name} must be consistent across all pages",
+                                   self,
+                                   :page => page_num,
+                                   :box  => name)
+              end
+            end
+          end
+        end
       end
+
+      def boxes_match?(box1, box2)
+        diffs = box1.zip(box2).map { |a,b| BigDecimal(a.to_s) - BigDecimal(b.to_s) }
+        diffs.all? { |diff| @tolerance.include?(diff) }
+      end
+
     end
   end
 end

@@ -65,8 +65,8 @@ module Preflight
         device_w = pt2in(image_width)
         device_h = pt2in(image_height)
 
-        horizontal_ppi = BigDecimal.new((sample_w / device_w).to_s).round(3)
-        vertical_ppi   = BigDecimal.new((sample_h / device_h).to_s).round(3)
+        horizontal_ppi = BigDecimal((sample_w / device_w).to_s).round(3)
+        vertical_ppi   = BigDecimal((sample_h / device_h).to_s).round(3)
 
         if horizontal_ppi < @min_ppi || vertical_ppi < @min_ppi
           @issues << Issue.new("Image with low PPI/DPI", self, :page           => @page.number,

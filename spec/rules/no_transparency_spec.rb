@@ -6,12 +6,12 @@ describe Preflight::Rules::NoTransparency do
     let!(:filename) { pdf_spec_file("transparency") }
 
     it "should fail with an issue" do
-      rule     = Preflight::Rules::NoTransparency.new
+      rule = Preflight::Rules::NoTransparency.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
 
-        rule.issues.should have(1).item
+        rule.issues.size.should == 1  # Changed from have(1).item
 
         issue = rule.issues.first
         issue.rule.should         == :"Preflight::Rules::NoTransparency"
@@ -28,7 +28,7 @@ describe Preflight::Rules::NoTransparency do
     let!(:filename) { pdf_spec_file("transparency") }
 
     it "should pass with no issues" do
-      rule     = Preflight::Rules::NoTransparency.new
+      rule = Preflight::Rules::NoTransparency.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)

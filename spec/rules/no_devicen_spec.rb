@@ -6,13 +6,16 @@ describe Preflight::Rules::NoDevicen do
     let!(:filename) { pdf_spec_file("devicen") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoDevicen.new
+      rule = Preflight::Rules::NoDevicen.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
+
+      issue = rule.issues.first
+      issue.names.should == [:Orange]
     end
   end
 
@@ -20,21 +23,13 @@ describe Preflight::Rules::NoDevicen do
     let!(:filename) { pdf_spec_file("devicen") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoDevicen.new
+      rule = Preflight::Rules::NoDevicen.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the colourant names in the issue" do
-      rule     = Preflight::Rules::NoDevicen.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(2).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.names.should == [:Orange]
@@ -45,21 +40,13 @@ describe Preflight::Rules::NoDevicen do
     let!(:filename) { pdf_spec_file("devicen") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoDevicen.new
+      rule = Preflight::Rules::NoDevicen.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the colourant names in the issue" do
-      rule     = Preflight::Rules::NoDevicen.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(3).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.names.should == [:Orange]
@@ -70,21 +57,13 @@ describe Preflight::Rules::NoDevicen do
     let!(:filename) { pdf_spec_file("devicen") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoDevicen.new
+      rule = Preflight::Rules::NoDevicen.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the colourant names in the issue" do
-      rule     = Preflight::Rules::NoDevicen.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(4).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.names.should == [:Orange]
@@ -95,21 +74,13 @@ describe Preflight::Rules::NoDevicen do
     let!(:filename) { pdf_spec_file("devicen") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoDevicen.new
+      rule = Preflight::Rules::NoDevicen.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(5).walk(rule)
       end
 
-      rule.issues.should have(1).item
-    end
-
-    it "should return the colourant names in the issue" do
-      rule     = Preflight::Rules::NoDevicen.new
-
-      PDF::Reader.open(filename) do |reader|
-        reader.page(5).walk(rule)
-      end
+      rule.issues.size.should == 1
 
       issue = rule.issues.first
       issue.names.should == [:Orange]

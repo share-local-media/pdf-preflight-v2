@@ -25,17 +25,20 @@ module Preflight
         @pattern = pattern
       end
 
-      def check_hash(objects)
-        root  = objects.deref(objects.trailer[:Root])
-        pages = objects.deref(root[:Pages])
-        count = objects.deref(pages[:Count])
+      def check_hash(ohash)
+        # Get the root object
+        root = ohash.object(ohash.trailer[:Root])
+        # Get the pages object
+        pages = ohash.object(root[:Pages])
+        # Get the page count
+        page_count = pages[:Count]
 
         case @pattern
-        when Fixnum then check_numeric(count)
-        when Range  then check_range(count)
-        when Array  then check_array(count)
-        when :even  then check_even(count)
-        when :odd   then check_odd(count)
+        when Integer then check_numeric(page_count)
+        when Range  then check_range(page_count)
+        when Array  then check_array(page_count)
+        when :even  then check_even(page_count)
+        when :odd   then check_odd(page_count)
         else
           [Issue.new("PageCount: invalid pattern", self)]
         end

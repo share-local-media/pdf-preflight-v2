@@ -6,13 +6,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -20,13 +20,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -34,13 +34,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -48,13 +48,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -62,13 +62,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(5).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -76,13 +76,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(6).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -90,13 +90,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(7).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -104,13 +104,13 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("rgb") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(8).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -118,7 +118,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
@@ -132,7 +132,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
@@ -146,7 +146,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
@@ -160,7 +160,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
@@ -174,7 +174,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(5).walk(rule)
@@ -188,7 +188,7 @@ describe Preflight::Rules::NoRgb do
     let!(:filename) { pdf_spec_file("cmyk") }
 
     it "should have no issues" do
-      rule     = Preflight::Rules::NoRgb.new
+      rule = Preflight::Rules::NoRgb.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(6).walk(rule)

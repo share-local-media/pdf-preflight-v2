@@ -6,13 +6,13 @@ describe Preflight::Rules::NoRegistrationBlack do
     let!(:filename) { pdf_spec_file("registration_black") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRegistrationBlack.new
+      rule = Preflight::Rules::NoRegistrationBlack.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(1).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -20,13 +20,13 @@ describe Preflight::Rules::NoRegistrationBlack do
     let!(:filename) { pdf_spec_file("registration_black") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRegistrationBlack.new
+      rule = Preflight::Rules::NoRegistrationBlack.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(2).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -34,13 +34,13 @@ describe Preflight::Rules::NoRegistrationBlack do
     let!(:filename) { pdf_spec_file("registration_black") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRegistrationBlack.new
+      rule = Preflight::Rules::NoRegistrationBlack.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(3).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
@@ -48,13 +48,13 @@ describe Preflight::Rules::NoRegistrationBlack do
     let!(:filename) { pdf_spec_file("registration_black") }
 
     it "should have one an issue" do
-      rule     = Preflight::Rules::NoRegistrationBlack.new
+      rule = Preflight::Rules::NoRegistrationBlack.new
 
       PDF::Reader.open(filename) do |reader|
         reader.page(4).walk(rule)
       end
 
-      rule.issues.should have(1).item
+      rule.issues.size.should == 1
     end
   end
 
