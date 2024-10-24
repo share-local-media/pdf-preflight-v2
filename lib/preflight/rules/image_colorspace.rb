@@ -7,11 +7,26 @@ module Preflight
 
       class ColorSpaceInfo
         ICC_PROFILES = {
-          'Adobe RGB (1998)' => /AdobeRGB1998/i,
+          # RGB Profiles
+          'Adobe RGB (1998)' => /AdobeRGB1998|Adobe RGB \(1998\)/i,
           'sRGB' => /sRGB|IEC.*61966/i,
           'ProPhoto RGB' => /ProPhoto|ROMM/i,
           'Display P3' => /Display.*P3/i,
-          'Adobe CMYK' => /U.S. Web Coated \(SWOP\)|Coated FOGRA/i
+
+          # CMYK Profiles
+          'Adobe CMYK' => /U\.S\. Web Coated \(SWOP\)|Coated FOGRA/i,
+          'Japan Color' => /Japan Color|Japan Standard/i,
+          'FOGRA' => /FOGRA(?:27|39|51|52|54|59)/i,
+          'GRACoL' => /GRACoL|GRACOL/i,
+          'ISO Coated' => /ISO Coated|ISO.*Coated/i,
+          'PSO' => /PSO.*Coated|PSO.*Uncoated/i,
+
+          # Gray Profiles
+          'Gray Gamma' => /Gray.*Gamma|Dot.*Gain/i,
+
+          # Generic Profile Patterns
+          'Generic RGB' => /ColorMatch|ECI-RGB/i,
+          'Generic CMYK' => /Euroscale|Coated|Uncoated/i
         }.freeze
 
         attr_reader :base_type, :icc_profile, :components, :bit_depth,
