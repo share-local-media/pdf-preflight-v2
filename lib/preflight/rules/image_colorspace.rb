@@ -29,7 +29,6 @@ module Preflight
           puts to_s
         rescue => e
           puts "DEBUG: Error initializing ColorSpaceInfo: #{e.message}" if $DEBUG
-          puts "DEBUG: xobject: #{xobject.hash.inspect}" if $DEBUG
           raise
         end
 
@@ -41,7 +40,6 @@ module Preflight
           details << "Bits/Component: #{@bit_depth}" if @bit_depth
           details << "Rendering Intent: #{@rendering_intent}" if @rendering_intent
           details << "Has Alpha Channel" if @has_alpha
-          details << "Indexed Base: #{@indexed_base}" if @indexed_base
           details.join(", ")
         end
 
@@ -50,8 +48,6 @@ module Preflight
         def has_alpha?(xobject)
           smask = xobject.hash[:SMask]
           mask = xobject.hash[:Mask]
-
-          puts "DEBUG: Checking alpha - SMask: #{smask.inspect}, Mask: #{mask.inspect}" if $DEBUG
 
           if smask.is_a?(PDF::Reader::Stream)
             true
@@ -66,7 +62,6 @@ module Preflight
 
         def extract_colorspace_info(xobject)
           cs = xobject.hash[:ColorSpace]
-          puts "DEBUG: Processing ColorSpace: #{cs.inspect}" if $DEBUG
 
           case cs
           when Symbol
@@ -232,7 +227,7 @@ module Preflight
         puts "DEBUG: Checking page for images" if $DEBUG
 
         page.xobjects.each do |name, xobject|
-          puts "DEBUG: Processing XObject '#{name}': #{xobject.hash.inspect}" if $DEBUG
+          puts "DEBUG: Processing XObject '#{name}'" if $DEBUG
           next unless xobject.hash[:Subtype] == :Image
 
           begin
