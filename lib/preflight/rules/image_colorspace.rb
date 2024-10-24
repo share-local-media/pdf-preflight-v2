@@ -326,6 +326,17 @@ module Preflight
           @allowed_spaces.include?(color_info.base_type)
         end
       end
+
+      def check_colorspace(obj)
+        case obj
+        when Hash
+          check_hash_colorspace(obj)
+        when Array
+          check_array_colorspace(obj)
+        else
+          raise "Unknown colorspace: #{obj.inspect}"
+        end
+      end
     end
   end
 end

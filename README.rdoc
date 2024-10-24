@@ -1,146 +1,57 @@
 = Preflight
 
-Check your PDF files meet the standard you require.
+A Ruby library to perform PDF preflight checks, ensuring documents meet specific requirements before going to print or digital distribution.
 
-The full PDF spec is a beast, and there are any number of ways of producing a
-valid PDF.  Receivers of PDF files may need to ensure the files they're sent
-meet a particular set of requirements, be it PDF/X, PDF/A or just "images must
-be 300 dpi or greater". These checks are called preflight.
+== Requirements
 
-There's expensive software around that can preflight for you, but it's often
-difficult to script and you know, expensive.
-
-This may not check as comprehensively as the official preflight tools from Adobe
-and friends, but hopefully it'll get you most of the way with less stress.
-
-Unlike some preflight tools, this library doesn't attempt to fix any issues. It
-only reports them. That may change one day, but for now you will need to fix
-any issues that are detected by using some other tool.
+* Ruby 3.0 or higher
+* RubyGems
 
 == Installation
 
-  gem install preflight
+Add this line to your application's Gemfile:
+
+    gem 'preflight'
+
+Or install it directly:
+
+    $ gem install preflight
+
+== Testing
+
+The test suite can be run via:
+
+    $ bundle exec rake spec
+
+Tests are automatically run via GitHub Actions on:
+* Ruby 3.0
+* Ruby 3.1
+* Ruby 3.2
 
 == Usage
 
-=== Standard Profile ( PDF/X-1a )
+Create a new preflight profile:
 
-To test a PDF file against a well known standard and rule set.
+    profile = Preflight::Profile.new do |p|
+      # ensure all text is black
+      p.rule Preflight::Rules::TextIsBlack
 
-  require "preflight"
+      # ensure the PDF contains no images
+      p.rule Preflight::Rules::NoImages
 
-  preflight = Preflight::Profiles::PDFX1A.new
+      # ensure only certain fonts are used
+      p.rule Preflight::Rules::FontsAreEmbedded
+    end
 
-  puts preflight.check("somefile.pdf").inspect
+Check a PDF file:
 
-  File.open("somefile.pdf", "rb") do |file|
-    puts preflight.check(file).inspect
-  end
-
-=== Custom Profile
-
-Create a custom set of rules to check against.
-
-  require "preflight"
-
-  class MyPreflight
-    include Preflight::Profile
-
-    profile_name "simple-pdf"
-
-    rule Preflight::Rules::MaxVersion, 1.4
-    rule Preflight::Rules::NoEncryption
-    rule Preflight::Rules::DocumentId
-  end
-
-  preflight = MyPreflight.new
-
-  puts preflight.check("somefile.pdf").inspect
-
-=== Extend A Profile
-
-Use an existing rule set as the base for a larger set of rules.
-
-  require "preflight"
-
-  class MyPreflight
-    include Preflight::Profile
-
-    profile_name "simple-pdf"
-
-    import Preflight::Profiles::PDFX1A
-
-    rule Preflight::Rules::MaxVersion, 1.4
-    rule Preflight::Rules::NoEncryption
-    rule Preflight::Rules::DocumentId
-  end
-
-  preflight = MyPreflight.new
-
-  puts preflight.check("somefile.pdf").inspect
-
-=== Adding Rules to a Profile Instance
-
-Dynamically add rules to a profile instance. Useful when the required set of
-rules depends on dynamic conditions like user input or database entries.
-
-  require "preflight"
-
-  preflight = Preflight::Profiles::PDFX1A.new
-  prefight.rule Preflight::Rules::MaxVersion, 1.4
-
-  puts preflight.check("somefile.pdf").inspect
-
-=== Available Rules
-
-All rules shipped with this gem are in the Preflight::Rules namespace. Explore
-the classes and related documentation in there to see what's available.
-
-If you need a rule that we don't ship it is perfectly valid to build your own.
-A profile will accept any class that behaves appropriately. If you think your
-new rule may be of general interest please send me a pull request so I can
-include it in the next release.
-
-I'm yet to document the API that a rule class must follow. There are two
-types of rule, each designed to check a different aspect of the target file
-- raw PDF objects and individual pages. At this stage your best option when
-writing your own rule is to copy an existing rule as a starting point.
-
-== Recent Changes
-
-* Updated to support modern Ruby versions (2.5+)
-* Modernized RSpec syntax throughout test suite
-* Fixed deprecated BigDecimal.new usage
-* Updated collection matchers to modern RSpec syntax
-* Added matrix gem dependency for newer Ruby versions
-
-== Development
-
-=== Requirements
-
-* Ruby 2.5 or newer
-* Bundler
-
-=== Setup
-
-1. Clone the repository
-2. Run `bundle install`
-
-=== Running Tests
-
-Run the full test suite:
-
-    bundle exec rake
-
-Run specific tests:
-
-    bundle exec rspec spec/path/to/spec.rb
-
-=== Running Quality Checks
-
-Run Roodi code quality checks:
-
-    bundle exec rake roodi
+    filename = "sample.pdf"
+    issues   = profile.check(filename)
+    if issues.empty?
+      puts "No issues"
+    else
+      issues.each { |issue| puts issue.description }
+    end
 
 == Contributing
 
@@ -152,58 +63,4 @@ Run Roodi code quality checks:
 
 == License
 
-MIT License - Copyright (c) James Healy
-
-== Further Reading
-
-* http://en.wikipedia.org/wiki/PDF/A
-* http://en.wikipedia.org/wiki/PDF/X
-* http://www.planetpdf.com/planetpdf/pdfs/pdfx3_draft4.pdf
-* http://www.gwg.org/doc_pdfxfaq.phtml
-* http://www.pdfxreport.com/lib/exe/fetch.php?id=en%3Adownloads&cache=cache&media=en:technote_pdfx_checks.pdf
-* http://shop.oreilly.com/product/0636920025269.do
-
-== PDF Test Samples
-
-The test suite includes functionality to generate PDF files with various color spaces for testing purposes. These samples are automatically generated when running the tests and include:
-
-* RGB color space PDF
-* CMYK color space PDF
-* Indexed color space PDF
-* ICC profile-based PDF
-
-=== Requirements for Sample Generation
-
-To generate test PDFs, you'll need:
-
-* ImageMagick installed on your system
-* Prawn gem (automatically installed as development dependency)
-* MiniMagick gem (automatically installed as development dependency)
-
-=== Sample Generation
-
-The test PDFs are automatically generated when running the test suite. They are created in the +spec/pdf+ directory.
-
-You can also generate or clean the samples using rake tasks:
-
-    # Generate test PDFs
-    rake samples:generate
-
-    # Clean generated PDFs
-    rake samples:clean
-
-If you want to generate the samples programmatically:
-
-    require 'preflight'
-    require 'spec/support/pdf_samples'
-    PDFSamples.create_test_pdfs
-
-=== Troubleshooting
-
-If you see warnings about PDF sample generation being disabled, ensure:
-
-1. ImageMagick is installed on your system
-2. Required gems are installed:
-       bundle install
-3. For ICC profile tests, your system should have standard ICC profiles installed
-   (typically in /usr/share/color/icc/ on Linux systems)
+This project is licensed under the MIT License. See LICENSE file for details.
