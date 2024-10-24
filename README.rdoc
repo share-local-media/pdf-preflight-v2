@@ -162,3 +162,48 @@ MIT License - Copyright (c) James Healy
 * http://www.gwg.org/doc_pdfxfaq.phtml
 * http://www.pdfxreport.com/lib/exe/fetch.php?id=en%3Adownloads&cache=cache&media=en:technote_pdfx_checks.pdf
 * http://shop.oreilly.com/product/0636920025269.do
+
+== PDF Test Samples
+
+The test suite includes functionality to generate PDF files with various color spaces for testing purposes. These samples are automatically generated when running the tests and include:
+
+* RGB color space PDF
+* CMYK color space PDF
+* Indexed color space PDF
+* ICC profile-based PDF
+
+=== Requirements for Sample Generation
+
+To generate test PDFs, you'll need:
+
+* ImageMagick installed on your system
+* Prawn gem (automatically installed as development dependency)
+* MiniMagick gem (automatically installed as development dependency)
+
+=== Sample Generation
+
+The test PDFs are automatically generated when running the test suite. They are created in the +spec/pdf+ directory.
+
+You can also generate or clean the samples using rake tasks:
+
+    # Generate test PDFs
+    rake samples:generate
+
+    # Clean generated PDFs
+    rake samples:clean
+
+If you want to generate the samples programmatically:
+
+    require 'preflight'
+    require 'spec/support/pdf_samples'
+    PDFSamples.create_test_pdfs
+
+=== Troubleshooting
+
+If you see warnings about PDF sample generation being disabled, ensure:
+
+1. ImageMagick is installed on your system
+2. Required gems are installed:
+       bundle install
+3. For ICC profile tests, your system should have standard ICC profiles installed
+   (typically in /usr/share/color/icc/ on Linux systems)

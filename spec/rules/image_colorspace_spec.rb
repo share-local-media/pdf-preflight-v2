@@ -11,6 +11,8 @@ describe Preflight::Rules::ImageColorspace do
 
   let(:rgb_pdf_path) { pdf_spec_file("color-space-rgb") }
   let(:cmyk_pdf_path) { pdf_spec_file("color-space-cymk") }
+  let(:indexed_pdf_path) { pdf_spec_file("color-space-indexed") }
+  let(:icc_pdf_path) { pdf_spec_file("color-space-icc") }
   let(:prophoto_pdf_path) { pdf_spec_file("prophoto-rgb") } # Assuming this is the path to a PDF with ProPhoto RGB
 
   describe "ColorSpaceInfo" do
@@ -44,6 +46,18 @@ describe Preflight::Rules::ImageColorspace do
       end
     end
 
+    it "correctly identifies Indexed color space" do
+      PDF::Reader.open(indexed_pdf_path) do |reader|
+        page = reader.page(1)
+        image = page.xobjects.values.find { |xobj|
+          xobj.hash[:Subtype] == :Image
+        }
+
+        info = color_info.new(image)
+        expect(info.base_type).to eq(:Indexed)
+        expect(info.components).to eq(1)
+      end
+    end
     it "detects presence of alpha channel" do
       PDF::Reader.open(rgb_pdf_path) do |reader|
         page = reader.page(1)
@@ -109,7 +123,7 @@ describe Preflight::Rules::ImageColorspace do
       let(:rule) { Preflight::Rules::ImageColorspace.new(:ICCBased) }
 
       it "detects ICC-based color spaces" do
-        PDF::Reader.open(rgb_pdf_path) do |reader|
+        PDF::Reader.open(icc_pdf_path) do |reader|
           page = reader.page(1)
           image = page.xobjects.values.find { |xobj|
             xobj.hash[:Subtype] == :Image &&
@@ -128,7 +142,7 @@ describe Preflight::Rules::ImageColorspace do
       end
 
       it "identifies common ICC profiles" do
-        PDF::Reader.open(rgb_pdf_path) do |reader|
+        PDF::Reader.open(icc_pdf_path) do |reader|
           page = reader.page(1)
           page.xobjects.each do |name, xobj|
             next unless xobj.hash[:Subtype] == :Image
