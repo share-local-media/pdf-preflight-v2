@@ -6,7 +6,6 @@ module Preflight
       DEVICE_SPACES = [:DeviceRGB, :DeviceCMYK, :DeviceGray]
 
       class ColorSpaceInfo
-        # Move ICC_PROFILES to class level
         ICC_PROFILES = {
           'Adobe RGB (1998)' => /AdobeRGB1998/i,
           'sRGB' => /sRGB|IEC.*61966/i,
@@ -34,7 +33,6 @@ module Preflight
           raise
         end
 
-        # Move to_s out of private section
         def to_s
           details = ["[ColorSpaceInfo]"]
           details << "Type: #{@base_type}"
@@ -76,7 +74,6 @@ module Preflight
             @components = components_for_device_space(cs)
           when Array
             parse_array_colorspace(cs)
-            # Map ICC profiles to their device equivalents for testing
             if @base_type == :ICCBased && @icc_profile
               @base_type = @icc_profile
             end
@@ -118,12 +115,18 @@ module Preflight
           profile_stream = stream.is_a?(PDF::Reader::Stream) ? stream : stream
           @components = profile_stream.hash[:N]
 
-          # Extract ICC profile details
+          # Try to get ICC profile from metadata first
           if profile_stream.hash[:Metadata]
             @icc_profile = extract_icc_metadata(profile_stream.hash[:Metadata])
+            puts "DEBUG: Found ICC profile in metadata: #{@icc_profile}" if $DEBUG
           end
 
-          # If we can't get the actual profile name, map based on components
+          # If no ICC profile found in metadata, check the stream data
+          if @icc_profile.nil? && profile_stream.is_a?(PDF::Reader::Stream)
+            identify_icc_profile(profile_stream)
+          end
+
+          # If still no profile found, map based on components
           @icc_profile ||= case @components
                           when 1 then :DeviceGray
                           when 3 then :DeviceRGB
@@ -131,24 +134,17 @@ module Preflight
                           else nil
                           end
 
-          puts "DEBUG: ICC Profile details:" if $DEBUG
-          puts "  - Stream: #{profile_stream.hash.inspect}" if $DEBUG
+          puts "DEBUG: Final ICC Profile determination:" if $DEBUG
           puts "  - Components: #{@components}" if $DEBUG
           puts "  - Profile Name: #{@icc_profile}" if $DEBUG
           puts "  - Alternate: #{profile_stream.hash[:Alternate]}" if $DEBUG
-          puts "  - Range: #{profile_stream.hash[:Range]}" if $DEBUG
-
-          # Try to identify common ICC profiles
-          identify_icc_profile(profile_stream)
         end
 
         def identify_icc_profile(profile_stream)
           return unless profile_stream.is_a?(PDF::Reader::Stream)
 
-          # Get the raw stream data
           stream_data = profile_stream.data.to_s
 
-          # Check stream data for profile signatures
           ICC_PROFILES.each do |name, pattern|
             if stream_data.match?(pattern)
               @icc_profile = name
@@ -157,7 +153,6 @@ module Preflight
             end
           end
 
-          # Check metadata if available
           if profile_stream.hash[:Metadata]
             metadata = profile_stream.hash[:Metadata]
             if metadata.is_a?(PDF::Reader::Stream)
@@ -177,18 +172,42 @@ module Preflight
           return nil unless metadata.is_a?(PDF::Reader::Stream)
 
           begin
-            # Try to parse XMP metadata
             content = metadata.data.to_s
-            if content.include?('xpacket') # XMP metadata
-              # Extract profile name from XMP
-              if content =~ /photoshop:ICCProfile>(.*?)</
-                profile_name = $1
-                puts "DEBUG: Found ICC Profile name in XMP: #{profile_name}" if $DEBUG
-                return profile_name
-              end
+            puts "DEBUG: Parsing XMP metadata:" if $DEBUG
+
+            # Check for photoshop:ICCProfile
+            if content =~ /photoshop:ICCProfile=\"([^\"]+)\"/
+              profile_name = $1
+              puts "DEBUG: Found ICC Profile in photoshop:ICCProfile: #{profile_name}" if $DEBUG
+              return profile_name
             end
+
+            # Check for iccProfile tag
+            if content =~ /iccProfile>(.*?)<\/iccProfile>/
+              profile_name = $1
+              puts "DEBUG: Found ICC Profile in iccProfile tag: #{profile_name}" if $DEBUG
+              return profile_name
+            end
+
+            # Check for xmp:ICCProfile
+            if content =~ /xmp:ICCProfile=\"([^\"]+)\"/
+              profile_name = $1
+              puts "DEBUG: Found ICC Profile in xmp:ICCProfile: #{profile_name}" if $DEBUG
+              return profile_name
+            end
+
+            # Check for older style ICC profile references
+            if content =~ /photoshop:ICCProfile>(.*?)</
+              profile_name = $1
+              puts "DEBUG: Found ICC Profile in legacy format: #{profile_name}" if $DEBUG
+              return profile_name
+            end
+
+            puts "DEBUG: No ICC profile found in metadata" if $DEBUG
+            nil
           rescue => e
             puts "DEBUG: Error parsing ICC metadata: #{e.message}" if $DEBUG
+            puts "DEBUG: Metadata content: #{content[0..200]}..." if $DEBUG
             nil
           end
         end
@@ -202,9 +221,10 @@ module Preflight
         end
       end
 
-      def initialize(*allowed_spaces)
-        @allowed_spaces = allowed_spaces.flatten # Add flatten to handle arrays
-        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}" if $DEBUG
+      def initialize(*allowed_spaces, blacklist: [])
+        @allowed_spaces = allowed_spaces.flatten
+        @blacklist = blacklist
+        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}, blacklist: #{@blacklist.inspect}" if $DEBUG
       end
 
       def check_page(page)
@@ -219,7 +239,35 @@ module Preflight
             color_info = ColorSpaceInfo.new(xobject)
             puts "DEBUG: Created ColorSpaceInfo for '#{name}': #{color_info}" if $DEBUG
 
-            unless valid_colorspace?(color_info)
+            # Check for ICC profile in metadata directly
+            if xobject.hash[:Metadata]
+              metadata = xobject.hash[:Metadata]
+              if metadata.is_a?(PDF::Reader::Stream)
+                content = metadata.data.to_s
+                if content =~ /photoshop:ICCProfile=\"([^\"]+)\"/
+                  profile_name = $1
+                  puts "DEBUG: Found ICC Profile in image metadata: #{profile_name}" if $DEBUG
+
+                  if @blacklist.include?(profile_name)
+                    issue = Issue.new(
+                      "Image '#{name}' uses blacklisted ICC profile: #{profile_name}",
+                      self,
+                      {
+                        page: page.number,
+                        colorspace: profile_name,
+                        message: "blacklisted color space"
+                      }
+                    )
+                    puts "DEBUG: Found blacklisted profile issue: #{issue.inspect}" if $DEBUG
+                    issues << issue
+                    next
+                  end
+                end
+              end
+            end
+
+            # Only check other color space rules if not already blacklisted
+            if !valid_colorspace?(color_info)
               issue = Issue.new(
                 "Image '#{name}' has invalid color space: #{color_info}",
                 self,
@@ -229,7 +277,7 @@ module Preflight
                   message: "invalid color space"
                 }
               )
-              puts "DEBUG: Found issue: #{issue.inspect}" if $DEBUG
+              puts "DEBUG: Found invalid color space issue: #{issue.inspect}" if $DEBUG
               issues << issue
             end
           rescue => e
@@ -249,6 +297,16 @@ module Preflight
       end
 
       private
+
+      def blacklisted?(color_info)
+        # Check both ICC profile name and metadata
+        if color_info.icc_profile && @blacklist.include?(color_info.icc_profile)
+          puts "DEBUG: Color space #{color_info.icc_profile} is blacklisted" if $DEBUG
+          true
+        else
+          false
+        end
+      end
 
       def valid_colorspace?(color_info)
         return true if @allowed_spaces.empty?

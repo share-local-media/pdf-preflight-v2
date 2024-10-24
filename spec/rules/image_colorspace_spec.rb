@@ -9,8 +9,9 @@ describe Preflight::Rules::ImageColorspace do
     $DEBUG = false # Disable debug output after tests complete
   end
 
-  let(:rgb_pdf_path) { pdf_spec_file("color-space-1") }
-  let(:cmyk_pdf_path) { pdf_spec_file("color-space-2") }
+  let(:rgb_pdf_path) { pdf_spec_file("color-space-rgb") }
+  let(:cmyk_pdf_path) { pdf_spec_file("color-space-cymk") }
+  let(:prophoto_pdf_path) { pdf_spec_file("prophoto-rgb") } # Assuming this is the path to a PDF with ProPhoto RGB
 
   describe "ColorSpaceInfo" do
     let(:color_info) { Preflight::Rules::ImageColorspace::ColorSpaceInfo }
@@ -163,6 +164,20 @@ describe Preflight::Rules::ImageColorspace do
             expect(info.base_type).to eq(:Indexed)
             expect(info.components).to eq(1)
           end
+        end
+      end
+    end
+
+    context "with blacklisted color profiles" do
+      let(:rule) { Preflight::Rules::ImageColorspace.new(:DeviceRGB, blacklist: ['ProPhoto RGB']) }
+
+      it "flags images using ProPhoto RGB as blacklisted" do
+        PDF::Reader.open(prophoto_pdf_path) do |reader|
+          issues = rule.check_page(reader.page(1))
+          puts "Issues: #{issues.inspect}"
+          expect(issues).not_to be_empty
+          expect(issues.first.description).to include("blacklisted ICC profile")
+          expect(issues.first.description).to include("ProPhoto RGB")
         end
       end
     end
