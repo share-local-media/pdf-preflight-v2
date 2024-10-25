@@ -1,21 +1,20 @@
 = Preflight
 
-Check your PDF files meet the standard you require.
+A Ruby gem for validating PDF files against specific standards and requirements.
 
-The full PDF spec is a beast, and there are any number of ways of producing a
-valid PDF.  Receivers of PDF files may need to ensure the files they're sent
-meet a particular set of requirements, be it PDF/X, PDF/A or just "images must
-be 300 dpi or greater". These checks are called preflight.
+== Overview
 
-There's expensive software around that can preflight for you, but it's often
-difficult to script and you know, expensive.
+The full PDF spec is complex, with numerous ways to produce valid PDF files. Organizations receiving PDF files often need to ensure they meet specific requirements - whether PDF/X, PDF/A, or custom requirements like "images must use specific ICC color profiles". These validation checks are called preflight.
 
-This may not check as comprehensively as the official preflight tools from Adobe
-and friends, but hopefully it'll get you most of the way with less stress.
+While expensive commercial preflight software exists, this gem provides a scriptable, cost-effective alternative that integrates easily into your Ruby applications.
 
-Unlike some preflight tools, this library doesn't attempt to fix any issues. It
-only reports them. That may change one day, but for now you will need to fix
-any issues that are detected by using some other tool.
+Key Features:
+* Validates PDFs against standard profiles (like PDF/X-1a)
+* Supports custom validation rules and profiles
+* Comprehensive image colorspace validation with ICC profile support
+* No modification of source PDFs - validation only
+
+Unlike commercial preflight tools, this library focuses on detection rather than correction of issues.
 
 == Installation
 
@@ -23,132 +22,126 @@ any issues that are detected by using some other tool.
 
 == Usage
 
-=== Standard Profile ( PDF/X-1a )
+=== Standard Profile (PDF/X-1a)
 
-To test a PDF file against a well known standard and rule set.
+To validate a PDF against a standard profile:
 
   require "preflight"
 
   preflight = Preflight::Profiles::PDFX1A.new
+  results = preflight.check("somefile.pdf")
 
-  puts preflight.check("somefile.pdf").inspect
-
+  # Or using a file handle
   File.open("somefile.pdf", "rb") do |file|
-    puts preflight.check(file).inspect
+    results = preflight.check(file)
   end
 
 === Custom Profile
 
-Create a custom set of rules to check against.
+Create a custom set of validation rules:
 
   require "preflight"
 
   class MyPreflight
     include Preflight::Profile
 
-    profile_name "simple-pdf"
+    profile_name "custom-pdf-check"
 
     rule Preflight::Rules::MaxVersion, 1.4
     rule Preflight::Rules::NoEncryption
     rule Preflight::Rules::DocumentId
+    # Advanced color space validation
+    rule Preflight::Rules::ImageColorspace, [:DeviceRGB, :DeviceCMYK],
+         blacklist: ['Adobe RGB (1998)']
   end
 
   preflight = MyPreflight.new
+  results = preflight.check("somefile.pdf")
 
-  puts preflight.check("somefile.pdf").inspect
+=== Image Colorspace Validation
 
-=== Extend A Profile
+The ImageColorspace rule provides comprehensive color space validation:
 
-Use an existing rule set as the base for a larger set of rules.
+* Supports common color spaces (DeviceRGB, DeviceCMYK, DeviceGray)
+* ICC profile detection and validation
+* Blacklist/whitelist specific ICC profiles
+* Handles indexed color spaces
+* Alpha channel detection
+* Metadata extraction
 
-  require "preflight"
+Example usage:
+
+  # Allow only CMYK and Gray, block specific ICC profiles
+  rule Preflight::Rules::ImageColorspace,
+       [:DeviceCMYK, :DeviceGray],
+       blacklist: ['Adobe RGB (1998)', 'sRGB']
+
+=== Extending Profiles
+
+Build upon existing rule sets:
 
   class MyPreflight
     include Preflight::Profile
 
-    profile_name "simple-pdf"
+    profile_name "extended-pdfx1a"
 
     import Preflight::Profiles::PDFX1A
 
+    # Add additional rules
     rule Preflight::Rules::MaxVersion, 1.4
-    rule Preflight::Rules::NoEncryption
-    rule Preflight::Rules::DocumentId
+    rule Preflight::Rules::ImageColorspace, [:DeviceCMYK]
   end
 
-  preflight = MyPreflight.new
+=== Dynamic Rule Addition
 
-  puts preflight.check("somefile.pdf").inspect
-
-=== Adding Rules to a Profile Instance
-
-Dynamically add rules to a profile instance. Useful when the required set of
-rules depends on dynamic conditions like user input or database entries.
-
-  require "preflight"
+Add rules to a profile instance at runtime:
 
   preflight = Preflight::Profiles::PDFX1A.new
-  prefight.rule Preflight::Rules::MaxVersion, 1.4
+  preflight.rule Preflight::Rules::MaxVersion, 1.4
+  results = preflight.check("somefile.pdf")
 
-  puts preflight.check("somefile.pdf").inspect
+== Available Rules
 
-=== Available Rules
+All rules are in the Preflight::Rules namespace. Key rules include:
 
-All rules shipped with this gem are in the Preflight::Rules namespace. Explore
-the classes and related documentation in there to see what's available.
+* ImageColorspace - Validates image color spaces and ICC profiles
+* MaxVersion - Ensures PDF version compliance
+* NoEncryption - Checks for encrypted content
+* DocumentId - Validates document identification
+* InfoHasKeys - Verifies PDF metadata
 
-If you need a rule that we don't ship it is perfectly valid to build your own.
-A profile will accept any class that behaves appropriately. If you think your
-new rule may be of general interest please send me a pull request so I can
-include it in the next release.
+Custom rules can be created by implementing the appropriate rule interface.
 
-I'm yet to document the API that a rule class must follow. There are two
-types of rule, each designed to check a different aspect of the target file
-- raw PDF objects and individual pages. At this stage your best option when
-writing your own rule is to copy an existing rule as a starting point.
+== Requirements
 
-== Recent Changes
-
-* Updated to support modern Ruby versions (2.5+)
-* Modernized RSpec syntax throughout test suite
-* Fixed deprecated BigDecimal.new usage
-* Updated collection matchers to modern RSpec syntax
-* Added matrix gem dependency for newer Ruby versions
+* Ruby 3.0 or newer
+* PDF::Reader gem
+* RSpec for testing
 
 == Development
-
-=== Requirements
-
-* Ruby 2.5 or newer
-* Bundler
 
 === Setup
 
 1. Clone the repository
 2. Run `bundle install`
 
-=== Running Tests
+=== Testing
 
 Run the full test suite:
 
-    bundle exec rake
+  bundle exec rake
 
 Run specific tests:
 
-    bundle exec rspec spec/path/to/spec.rb
-
-=== Running Quality Checks
-
-Run Roodi code quality checks:
-
-    bundle exec rake roodi
+  bundle exec rspec spec/path/to/spec.rb
 
 == Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+4. Push to the branch (`git push origin feature/my-new-feature`)
+5. Create a Pull Request
 
 == License
 
@@ -158,7 +151,5 @@ MIT License - Copyright (c) James Healy
 
 * http://en.wikipedia.org/wiki/PDF/A
 * http://en.wikipedia.org/wiki/PDF/X
-* http://www.planetpdf.com/planetpdf/pdfs/pdfx3_draft4.pdf
-* http://www.gwg.org/doc_pdfxfaq.phtml
-* http://www.pdfxreport.com/lib/exe/fetch.php?id=en%3Adownloads&cache=cache&media=en:technote_pdfx_checks.pdf
+* https://www.gwg.org/workflow-tools/gwg-2022-specifications/
 * http://shop.oreilly.com/product/0636920025269.do

@@ -21,4 +21,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency("roodi")
   s.add_development_dependency("rspec", "~>3.10")
   s.add_development_dependency("ZenTest", "~>4.4.2")
+  s.add_development_dependency('prawn', '~> 2.4')  # Add this line
+  s.add_development_dependency "mini_magick"
 end
