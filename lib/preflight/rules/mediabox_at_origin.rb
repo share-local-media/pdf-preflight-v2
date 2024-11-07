@@ -35,11 +35,7 @@ module Preflight
       private
 
       def round_off(*arr)
-<<<<<<< HEAD
         arr.flatten.compact.map { |n| BigDecimal(n.to_s).round(2) }  # removed .new
-=======
-        arr.flatten.compact.map { |n| BigDecimal(n.to_s).round(2) }
->>>>>>> old-fork/slm
       end
     end
   end
