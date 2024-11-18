@@ -10,7 +10,7 @@ describe Preflight::Profiles::BasePDFX do
       let(:file_string) { 'pdfx-1a-subsetting' }
 
       it "correctly pass a valid PDF/X-1a file that uses font subsetting" do
-        results.empty?.should be_true
+        expect(results).to be_empty
       end
     end
 
@@ -18,7 +18,7 @@ describe Preflight::Profiles::BasePDFX do
       let(:file_string) { 'pdfx-1a-no-subsetting' }
 
       it "correctly pass a valid PDF/X-1a file that doesn't use font subsetting" do
-        results.empty?.should be_true
+        expect(results).to be_empty
       end
     end
 
@@ -26,7 +26,7 @@ describe Preflight::Profiles::BasePDFX do
       let(:file_string) { 'version_1_4' }
 
       it "correctly detect files with an incompatible version" do
-        results.empty?.should_not be_true
+        expect(results).not_to be_empty
       end
     end
 
@@ -34,7 +34,7 @@ describe Preflight::Profiles::BasePDFX do
       let(:file_string) { 'encrypted' }
 
       it "correctly detect encrypted files" do
-        results.should eql(["Can't preflight an encrypted PDF"])
+        expect(results).to eq(["Can't preflight an encrypted PDF"])
       end
     end
 
@@ -42,12 +42,25 @@ describe Preflight::Profiles::BasePDFX do
       let(:file_string) { 'encrypted_with_user_pass_apples' }
 
       it "correctly detect encrypted files with a user password" do
-        results.should eql(["Can't preflight an encrypted PDF"])
+        expect(results).to eq(["Can't preflight an encrypted PDF"])
       end
     end
 
-    it "should fail files that use object streams"
-    it "should fail files that use xref streams"
+    context 'with object streams' do
+      it "should fail files that use object streams" do
+        skip "Test file with object streams needs to be created"
+        file_string = 'pdf_with_object_streams'
+        expect(results).not_to be_empty
+      end
+    end
+
+    context 'with xref streams' do
+      it "should fail files that use xref streams" do
+        skip "Test file with xref streams needs to be created"
+        file_string = 'pdf_with_xref_streams'
+        expect(results).not_to be_empty
+      end
+    end
   end
 
   context 'with PDF/X-4' do
@@ -55,7 +68,7 @@ describe Preflight::Profiles::BasePDFX do
 
     context 'without subsettings' do
       it "correctly pass a valid PDF/X-4 file that doesn't use font subsetting" do
-        results.empty?.should be_true
+        expect(results).to be_empty
       end
     end
   end
