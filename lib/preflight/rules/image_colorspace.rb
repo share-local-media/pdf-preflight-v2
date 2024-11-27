@@ -231,35 +231,32 @@ module Preflight
         end
       end
 
+      attr_reader :issues
+
       def initialize(*allowed_spaces, blacklist: [])
         @allowed_spaces = allowed_spaces.flatten
         @blacklist = blacklist
-        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}, blacklist: #{@blacklist.inspect}" if $DEBUG
+        @issues = []
       end
 
-      def check_page(page)
-        issues = []
-        puts "DEBUG: Checking page for images" if $DEBUG
+      def page=(page)
+        @issues = []
 
         page.xobjects.each do |name, xobject|
-          puts "DEBUG: Processing XObject '#{name}'" if $DEBUG
           next unless xobject.hash[:Subtype] == :Image
 
           begin
             color_info = ColorSpaceInfo.new(xobject)
-            puts "DEBUG: Created ColorSpaceInfo for '#{name}': #{color_info}" if $DEBUG
 
-            # Check for ICC profile in metadata directly
+            # Check for blacklisted profiles
             if xobject.hash[:Metadata]
               metadata = xobject.hash[:Metadata]
               if metadata.is_a?(PDF::Reader::Stream)
                 content = metadata.data.to_s
                 if content =~ /photoshop:ICCProfile=\"([^\"]+)\"/
                   profile_name = $1
-                  puts "DEBUG: Found ICC Profile in image metadata: #{profile_name}" if $DEBUG
-
                   if @blacklist.include?(profile_name)
-                    issue = Issue.new(
+                    @issues << Issue.new(
                       "Image '#{name}' uses blacklisted ICC profile: #{profile_name}",
                       self,
                       {
@@ -268,17 +265,15 @@ module Preflight
                         message: "blacklisted color space"
                       }
                     )
-                    puts "DEBUG: Found blacklisted profile issue: #{issue.inspect}" if $DEBUG
-                    issues << issue
                     next
                   end
                 end
               end
             end
 
-            # Only check other color space rules if not already blacklisted
-            if !valid_colorspace?(color_info)
-              issue = Issue.new(
+            # Check color space validity
+            unless valid_colorspace?(color_info)
+              @issues << Issue.new(
                 "Image '#{name}' has invalid color space: #{color_info}",
                 self,
                 {
@@ -287,12 +282,9 @@ module Preflight
                   message: "invalid color space"
                 }
               )
-              puts "DEBUG: Found invalid color space issue: #{issue.inspect}" if $DEBUG
-              issues << issue
             end
           rescue => e
-            puts "DEBUG: Error processing XObject '#{name}': #{e.message}" if $DEBUG
-            issues << Issue.new(
+            @issues << Issue.new(
               "Error processing image '#{name}': #{e.message}",
               self,
               {
@@ -302,8 +294,6 @@ module Preflight
             )
           end
         end
-
-        issues
       end
 
       private
