@@ -30,7 +30,7 @@ module Preflight
       rule Preflight::Rules::OutputIntentForPdfx
       rule Preflight::Rules::PdfxOutputIntentHasKeys, :OutputConditionIdentifier, :Info
       rule Preflight::Rules::NoRgb
-      rule Preflight::Rules::ImageColorspace, :DeviceRGB, blacklist: ['ProPhoto RGB']
+      rule Preflight::Rules::ImageColorspace, [:DeviceRGB, :DeviceCMYK, :ICCBased], blacklist: ['ProPhoto RGB']
     end
   end
 end
