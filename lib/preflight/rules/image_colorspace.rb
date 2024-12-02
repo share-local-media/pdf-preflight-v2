@@ -249,7 +249,7 @@ module Preflight
             color_info = ColorSpaceInfo.new(xobject)
 
             # Check for blacklisted profiles
-            if xobject.hash[:Metadata]
+            if @blacklist.any? && xobject.hash[:Metadata]
               metadata = xobject.hash[:Metadata]
               if metadata.is_a?(PDF::Reader::Stream)
                 content = metadata.data.to_s

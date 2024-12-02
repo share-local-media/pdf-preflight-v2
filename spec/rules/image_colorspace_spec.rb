@@ -93,8 +93,9 @@ describe Preflight::Rules::ImageColorspace do
 
     it "accepts files with allowed color spaces" do
       PDF::Reader.open(rgb_pdf_path) do |reader|
-        issues = rule.check_page(reader.page(1))
-        expect(issues).to be_empty
+        page = reader.page(1)
+        rule.page = page
+        expect(rule.issues).to be_empty
       end
     end
 
@@ -102,9 +103,10 @@ describe Preflight::Rules::ImageColorspace do
       rule = Preflight::Rules::ImageColorspace.new(:DeviceRGB) # Only allow RGB
 
       PDF::Reader.open(cmyk_pdf_path) do |reader|
-        issues = rule.check_page(reader.page(1))
-        expect(issues).not_to be_empty
-        expect(issues.first.description).to include("invalid color space")
+        page = reader.page(1)
+        rule.page = page
+        expect(rule.issues).not_to be_empty
+        expect(rule.issues.first.description).to include("invalid color space")
       end
     end
 
@@ -113,8 +115,9 @@ describe Preflight::Rules::ImageColorspace do
 
       [rgb_pdf_path, cmyk_pdf_path].each do |path|
         PDF::Reader.open(path) do |reader|
-          issues = rule.check_page(reader.page(1))
-          expect(issues).to be_empty
+          page = reader.page(1)
+          rule.page = page
+          expect(rule.issues).to be_empty
         end
       end
     end
@@ -187,11 +190,12 @@ describe Preflight::Rules::ImageColorspace do
 
       it "flags images using ProPhoto RGB as blacklisted" do
         PDF::Reader.open(prophoto_pdf_path) do |reader|
-          issues = rule.check_page(reader.page(1))
-          puts "Issues: #{issues.inspect}"
-          expect(issues).not_to be_empty
-          expect(issues.first.description).to include("blacklisted ICC profile")
-          expect(issues.first.description).to include("ProPhoto RGB")
+          page = reader.page(1)
+          rule.page = page
+          puts "Issues: #{rule.issues.inspect}"
+          expect(rule.issues).not_to be_empty
+          expect(rule.issues.first.description).to include("blacklisted ICC profile")
+          expect(rule.issues.first.description).to include("ProPhoto RGB")
         end
       end
     end
