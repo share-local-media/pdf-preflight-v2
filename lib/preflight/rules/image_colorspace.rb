@@ -234,6 +234,7 @@ module Preflight
       attr_reader :issues
 
       def initialize(*allowed_spaces, blacklist: [])
+        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}, blacklist: #{@blacklist.inspect}" if $DEBUG
         @allowed_spaces = allowed_spaces.flatten
         @blacklist = blacklist
         @issues = []
@@ -241,20 +242,23 @@ module Preflight
 
       def page=(page)
         @issues = []
-
+        puts "DEBUG: Checking page for images" if $DEBUG
         page.xobjects.each do |name, xobject|
+          puts "DEBUG: Processing XObject '#{name}'" if $DEBUG
           next unless xobject.hash[:Subtype] == :Image
 
           begin
             color_info = ColorSpaceInfo.new(xobject)
+            puts "DEBUG: Created ColorSpaceInfo for '#{name}': #{color_info}" if $DEBUG
 
-            # Check for blacklisted profiles
+            # Check for ICC profile in metadata directly
             if @blacklist.any? && xobject.hash[:Metadata]
               metadata = xobject.hash[:Metadata]
               if metadata.is_a?(PDF::Reader::Stream)
                 content = metadata.data.to_s
                 if content =~ /photoshop:ICCProfile=\"([^\"]+)\"/
                   profile_name = $1
+                  puts "DEBUG: Found ICC Profile in image metadata: #{profile_name}" if $DEBUG
                   if @blacklist.include?(profile_name)
                     @issues << Issue.new(
                       "Image '#{name}' uses blacklisted ICC profile: #{profile_name}",
@@ -265,6 +269,7 @@ module Preflight
                         message: "blacklisted color space"
                       }
                     )
+                    puts "DEBUG: Found blacklisted profile issue: #{issue.inspect}" if $DEBUG
                     next
                   end
                 end
@@ -284,6 +289,7 @@ module Preflight
               )
             end
           rescue => e
+            puts "DEBUG: Error processing XObject '#{name}': #{e.message}" if $DEBUG
             @issues << Issue.new(
               "Error processing image '#{name}': #{e.message}",
               self,
