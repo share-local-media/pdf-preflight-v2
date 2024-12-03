@@ -234,10 +234,11 @@ module Preflight
       attr_reader :issues
 
       def initialize(*allowed_spaces, blacklist: [])
-        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}, blacklist: #{@blacklist.inspect}" if $DEBUG
         @allowed_spaces = allowed_spaces.flatten
         @blacklist = blacklist
         @issues = []
+
+        puts "DEBUG: Initialized with allowed spaces: #{@allowed_spaces.inspect}, blacklist: #{@blacklist.inspect}" if $DEBUG
       end
 
       def page=(page)
